@@ -14,25 +14,25 @@ args = parser.parse_args()
 
 # Hyperparameters
 learning_rates = torch.logspace(-4, -1, 4).tolist()
-weight_decays = torch.linspace(0, 1, 5).tolist()
+beta1 = torch.linspace(0, 1, 5).tolist()
 
 # Determine hyperparameters based on job index
 num_lr = len(learning_rates)
-num_wd = len(weight_decays)
-total_combinations = num_lr * num_wd
+num_beta1 = len(beta1)
+total_combinations = num_lr * num_beta1
 
 job_index = args.job_index - 1
 if job_index >= total_combinations:
     raise ValueError("Job index exceeds the number of hyperparameter combinations")
 
-lr_index = job_index // num_wd
-wd_index = job_index % num_wd
+lr_index = job_index // num_beta1
+beta1_index = job_index % num_beta1
 
 learning_rate = learning_rates[lr_index]
-weight_decay = weight_decays[wd_index]
+beta_1 = beta1[beta1_index]
 
 # TensorBoard writer
-writer = SummaryWriter(f'runs/resnet_experiment_lr_{learning_rate}_wd_{weight_decay}')
+writer = SummaryWriter(f'runs/adam_lr_{learning_rate}_beta1_{beta_1}')
 
 # Dataset preparation
 transform = transforms.Compose([transforms.ToTensor(),
@@ -51,7 +51,7 @@ net = net.to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=weight_decay)
+optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta_1, 0.999))
 
 # Training loop
 num_epochs = 10  # Adjust the number of epochs according to your needs
@@ -94,4 +94,4 @@ for epoch in range(num_epochs):
 writer.close()
 
 # Save model
-torch.save(net.state_dict(), f'model_index_{args.job_index}_lr_{learning_rate}_wd_{weight_decay}.pth')
+torch.save(net.state_dict(), f'model_index_{args.job_index}_lr_{learning_rate}_wd_{beta_1}.pth')
