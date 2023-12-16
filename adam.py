@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 # Hyperparameters
 learning_rates = torch.logspace(-4, -1, 4).tolist()
-beta1 = torch.linspace(0, 1, 5).tolist()
+beta1 = torch.logspace(-0.1, -0.001, 5).tolist()
 
 # Determine hyperparameters based on job index
 num_lr = len(learning_rates)
@@ -49,12 +49,14 @@ net = torchvision.models.resnet18(weights=None, num_classes=10)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 net = net.to(device)
 
+num_epochs = 500  # Adjust the number of epochs according to your needs
+
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta_1, 0.999))
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
 # Training loop
-num_epochs = 500  # Adjust the number of epochs according to your needs
 for epoch in range(num_epochs):
     net.train()
     running_loss = 0.0
