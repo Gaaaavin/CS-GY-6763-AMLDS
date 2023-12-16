@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 # Argument parsing
 parser = argparse.ArgumentParser(description='Train ResNet on CIFAR-10 with different hyperparameters.')
-parser.add_argument('--job_index', type=int, required=True, help='Job index from SLURM array job')
+parser.add_argument('--job_index', type=int, default=0, help='Job index from SLURM array job')
 args = parser.parse_args()
 
 # Hyperparameters
@@ -39,10 +39,10 @@ transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=512, shuffle=True, num_workers=4, pin_memory=True)
 
 testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=128, shuffle=False)
+testloader = torch.utils.data.DataLoader(testset, batch_size=512, shuffle=False, num_workers=4, pin_memory=True)
 
 # Model
 net = torchvision.models.resnet18(weights=None, num_classes=10)
@@ -54,7 +54,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
 # Training loop
-num_epochs = 10  # Adjust the number of epochs according to your needs
+num_epochs = 500  # Adjust the number of epochs according to your needs
 for epoch in range(num_epochs):
     net.train()
     running_loss = 0.0
@@ -94,4 +94,4 @@ for epoch in range(num_epochs):
 writer.close()
 
 # Save model
-torch.save(net.state_dict(), f'model_index_{args.job_index}_lr_{learning_rate}_wd_{weight_decay}.pth')
+# torch.save(net.state_dict(), f'model_index_{args.job_index}_lr_{learning_rate}_wd_{weight_decay}.pth')
