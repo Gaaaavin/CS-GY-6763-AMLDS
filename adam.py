@@ -91,6 +91,7 @@ for epoch in range(num_epochs):
 
     test_error = 1 - correct / total
     writer.add_scalar('Testing Error', test_error, epoch)
+    writer.add_scalars('Error vs Loss', {'Training Loss': running_loss, 'Testing Error': test_error}, epoch)
 
 # Close the writer
 writer.close()
