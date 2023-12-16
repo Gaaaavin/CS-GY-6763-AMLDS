@@ -13,8 +13,8 @@ parser.add_argument('--job_index', type=int, default=0, help='Job index from SLU
 args = parser.parse_args()
 
 # Hyperparameters
-learning_rates = torch.logspace(-4, -1, 4).tolist()
-beta1 = torch.logspace(-0.1, -0.001, 5).tolist()
+learning_rates = torch.logspace(-5, 0, 6).tolist()
+beta1 = torch.logspace(-2, -0.1, 6, base=2).tolist()
 
 # Determine hyperparameters based on job index
 num_lr = len(learning_rates)
@@ -49,7 +49,7 @@ net = torchvision.models.resnet18(weights=None, num_classes=10)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 net = net.to(device)
 
-num_epochs = 500  # Adjust the number of epochs according to your needs
+num_epochs = 100  # Adjust the number of epochs according to your needs
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
