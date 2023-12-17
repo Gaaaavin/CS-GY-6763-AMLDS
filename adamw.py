@@ -13,7 +13,7 @@ parser.add_argument('--job_index', type=int, default=0, help='Job index from SLU
 args = parser.parse_args()
 
 # Hyperparameters
-learning_rates = torch.logspace(-4, -1, 4).tolist()
+learning_rates = torch.logspace(-5, 0, 6).tolist()
 beta1 = torch.logspace(-2, -0.1, 6, base=2).tolist()
 
 # Determine hyperparameters based on job index
