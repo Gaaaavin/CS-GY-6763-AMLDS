@@ -32,7 +32,7 @@ learning_rate = learning_rates[lr_index]
 wd = wd[wd_index]
 
 # TensorBoard writer
-writer = SummaryWriter(f'runs/adamw_lr_{learning_rate}_wd_{wd}')
+writer = SummaryWriter(f'wd_runs/adamw_lr_{learning_rate}_wd_{wd}')
 
 # Dataset preparation
 transform = transforms.Compose([transforms.ToTensor(),
