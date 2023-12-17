@@ -72,7 +72,7 @@ for epoch in range(num_epochs):
         optimizer.step()
 
         running_loss += loss.item()
-
+    scheduler.step()
     # Log training loss
     writer.add_scalar('Training Loss', running_loss / len(trainloader), epoch)
 
