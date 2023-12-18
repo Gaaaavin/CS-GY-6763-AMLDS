@@ -9,30 +9,32 @@ from torch.utils.tensorboard import SummaryWriter
 
 # Argument parsing
 parser = argparse.ArgumentParser(description='Train ResNet on CIFAR-10 with different hyperparameters.')
+parser.add_argument('-o', '--optimizer', type=str, default='adam', help='Optimizer to use')
 parser.add_argument('--job_index', type=int, default=0, help='Job index from SLURM array job')
 args = parser.parse_args()
 
 # Hyperparameters
-learning_rates = torch.logspace(-5, 0, 6).tolist()
-wd = torch.logspace(-5, 0, 6, base=2).tolist()
+learning_rates = torch.logspace(-10, 0, 11, base=2) * 0.1
+learning_rates = learning_rates.tolist()
+beta1 = torch.logspace(-2, -0.1, 6, base=2).tolist()
 
 # Determine hyperparameters based on job index
 num_lr = len(learning_rates)
-num_wd = len(wd)
-total_combinations = num_lr * num_wd
+num_beta1 = len(beta1)
+total_combinations = num_lr * num_beta1
 
 job_index = args.job_index - 1
 if job_index >= total_combinations:
     raise ValueError("Job index exceeds the number of hyperparameter combinations")
 
-lr_index = job_index // num_wd
-wd_index = job_index % num_wd
+lr_index = job_index // num_beta1
+beta1_index = job_index % num_beta1
 
 learning_rate = learning_rates[lr_index]
-wd = wd[wd_index]
+beta_1 = beta1[beta1_index]
 
 # TensorBoard writer
-writer = SummaryWriter(f'wd_runs/adam_lr_{learning_rate}_wd_{wd}')
+writer = SummaryWriter(f'runs/adam_lr_{learning_rate}_beta1_{beta_1}')
 
 # Dataset preparation
 transform = transforms.Compose([transforms.ToTensor(),
@@ -53,7 +55,12 @@ num_epochs = 100  # Adjust the number of epochs according to your needs
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=wd)
+if args.optimizer == 'adam':
+    optimizer = optim.Adam(net.parameters(), lr=learning_rate, betas=(beta_1, 0.999))
+elif args.optimizer == 'adamw':
+    optimizer = optim.AdamW(net.parameters(), lr=learning_rate, betas=(beta_1, 0.999))
+else:
+    raise NotImplementedError("Invalid optimizer")
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
 # Training loop
@@ -95,6 +102,3 @@ for epoch in range(num_epochs):
 
 # Close the writer
 writer.close()
-
-# Save model
-# torch.save(net.state_dict(), f'model_index_{args.job_index}_lr_{learning_rate}_wd_{weight_decay}.pth')
