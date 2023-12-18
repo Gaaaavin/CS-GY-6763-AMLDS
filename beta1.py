@@ -34,7 +34,7 @@ learning_rate = learning_rates[lr_index]
 beta_1 = beta1[beta1_index]
 
 # TensorBoard writer
-writer = SummaryWriter(f'runs/adam_lr_{learning_rate}_beta1_{beta_1}')
+writer = SummaryWriter(f'runs/{args.optmizer}_lr_{learning_rate}_beta1_{beta_1}')
 
 # Dataset preparation
 transform = transforms.Compose([transforms.ToTensor(),
